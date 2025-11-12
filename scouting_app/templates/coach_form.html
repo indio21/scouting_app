@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if coach else 'Nuevo' }} miembro{% endblock %}
+
+{% block content %}
+<h1>{{ 'Editar' if coach else 'Nuevo' }} miembro del cuerpo técnico</h1>
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input type="text" name="name" class="form-control" value="{{ coach.name if coach else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Rol</label>
+    <input type="text" name="role" class="form-control" value="{{ coach.role if coach else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Edad</label>
+    <input type="number" name="age" class="form-control" value="{{ coach.age if coach else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Club</label>
+    <input type="text" name="club" class="form-control" value="{{ coach.club if coach else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">País</label>
+    <input type="text" name="country" class="form-control" value="{{ coach.country if coach else '' }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a href="{{ url_for('list_coaches') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

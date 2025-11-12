@@ -1,0 +1,500 @@
+{% extends "base.html" %}
+{% block title %}{{ player.name }}{% endblock %}
+
+{% block content %}
+<section id="resumen" class="player-header card mb-4">
+    <div class="card-body d-flex flex-column flex-lg-row align-items-lg-center justify-content-between">
+        <div class="mb-3 mb-lg-0">
+            <h1 class="mb-2">{{ player.name }}</h1>
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="badge bg-primary">{{ player.position }}</span>
+                {% if player.club %}
+                <span class="badge bg-secondary">Club: {{ player.club }}</span>
+                {% endif %}
+                {% if player.country %}
+                <span class="badge bg-info text-dark">Pais: {{ player.country }}</span>
+                {% endif %}
+                <span class="badge bg-dark">Edad: {{ player.age }}</span>
+                {% if projection and projection.category == 'Alto potencial' %}
+                <span class="badge bg-success">Proyeccion alta</span>
+                {% elif projection and projection.category == 'Potencial medio' %}
+                <span class="badge bg-warning text-dark">Proyeccion media</span>
+                {% elif projection %}
+                <span class="badge bg-secondary">Proyeccion baja</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex flex-column flex-lg-row gap-3 align-items-lg-center">
+            {% if projection %}
+            <div class="text-lg-end text-center">
+                <div class="fw-semibold text-muted small">Probabilidad combinada</div>
+                <div class="display-6 fw-bold">{{ (projection.combined_prob * 100)|round(1) }}%</div>
+                <div class="text-muted small">Modelo base: {{ (projection.base_prob * 100)|round(1) }}%</div>
+            </div>
+            {% endif %}
+            <div class="btn-group flex-wrap">
+                <a class="btn btn-outline-primary" href="#perfil-tecnico">Ficha tecnica</a>
+                <a class="btn btn-outline-primary" href="#historial-atributos">Evolucion tecnica</a>
+                <a class="btn btn-outline-primary" href="#historial-rendimiento">Historial de rendimiento</a>
+                <a class="btn btn-outline-primary" href="#perfil-psicologico">Perfil psicologico</a>
+                <a class="btn btn-outline-success" href="{{ url_for('player_attributes', player_id=player.id) }}">Actualizar atributos</a>
+                <a class="btn btn-outline-success" href="{{ url_for('player_stats', player_id=player.id) }}">Agregar rendimiento</a>
+                <a class="btn btn-success" href="{{ url_for('predict_player', player_id=player.id) }}">Ver proyeccion</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="perfil-tecnico" class="row g-4">
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Indicadores actuales</div>
+            <div class="card-body">
+                <div class="row">
+                    {% for attr in technical_attributes %}
+                    <div class="col-sm-6 mb-3">
+                        <div class="attribute-item">
+                            <span class="attribute-label">{{ attr.label }}</span>
+                            <div class="progress attribute-progress">
+                                <div class="progress-bar bg-gradient" role="progressbar"
+                                     style="width: {{ (attr.value / 20 * 100) | round(0) }}%"
+                                     aria-valuenow="{{ attr.value }}" aria-valuemin="0" aria-valuemax="20">
+                                    {{ attr.value }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Radar tecnico (0 - 20)</div>
+            <div class="card-body">
+                <canvas id="technicalRadar" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="historial-atributos" class="card mt-5">
+    <div class="card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+        <div>
+            <h4 class="mb-0">Evolucion tecnica y mental</h4>
+            <small class="text-muted">Registra mejoras o retrocesos en los atributos clave para mantener la proyeccion actualizada.</small>
+        </div>
+        <div class="btn-group">
+            <a class="btn btn-outline-success btn-sm" href="{{ url_for('player_attributes', player_id=player.id) }}">Agregar registro</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('predict_player', player_id=player.id) }}">Recalcular potencial</a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if attribute_summary.entries == 0 %}
+        <p class="mb-0 text-muted">Todavia no se cargaron registros de atributos para este jugador.</p>
+        {% else %}
+        <div class="row g-3 summary-grid">
+            {% for field, label in attribute_labels.items() %}
+            {% if field in attribute_summary %}
+            <div class="col-6 col-md-3 col-xl-2">
+                <div class="summary-card">
+                    <span class="label">{{ label }}</span>
+                    <span class="value">
+                        {% if attribute_summary[field] is not none %}
+                        {{ attribute_summary[field] }}
+                        {% else %}
+                        --
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <p class="text-muted small mt-2">Ultima carga: {{ attribute_summary.latest_date or 'Sin registros' }}</p>
+
+        <p class="text-muted small mt-2">Ultima carga: {{ stats_summary.latest_date or 'Sin registros' }}</p>
+
+        <div class="timeline-wrapper mt-4">
+            <canvas id="attributeChart" height="280"></canvas>
+        </div>
+
+        <div class="table-responsive mt-4">
+            <table class="table table-sm table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Ritmo</th>
+                        <th>Disparo</th>
+                        <th>Pase</th>
+                        <th>Regate</th>
+                        <th>Defensa</th>
+                        <th>Fisico</th>
+                        <th>Vision</th>
+                        <th>Determinacion</th>
+                        <th>Tecnica</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in attribute_history %}
+                    <tr>
+                        <td>{{ entry.record_date.strftime('%Y-%m-%d') if entry.record_date else '-' }}</td>
+                        <td>{{ entry.pace if entry.pace is not none else '--' }}</td>
+                        <td>{{ entry.shooting if entry.shooting is not none else '--' }}</td>
+                        <td>{{ entry.passing if entry.passing is not none else '--' }}</td>
+                        <td>{{ entry.dribbling if entry.dribbling is not none else '--' }}</td>
+                        <td>{{ entry.defending if entry.defending is not none else '--' }}</td>
+                        <td>{{ entry.physical if entry.physical is not none else '--' }}</td>
+                        <td>{{ entry.vision if entry.vision is not none else '--' }}</td>
+                        <td>{{ entry.determination if entry.determination is not none else '--' }}</td>
+                        <td>{{ entry.technique if entry.technique is not none else '--' }}</td>
+                        <td>{{ entry.notes or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <small class="text-muted d-block mt-2">Se muestran los ultimos tres registros. Consulta "Actualizar atributos" para ver el historial completo.</small>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section id="historial-rendimiento" class="card mt-5">
+    <div class="card-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+        <div>
+            <h4 class="mb-0">Historial de rendimiento</h4>
+            <small class="text-muted">Datos de partidos, cargas y observaciones para contextualizar la proyeccion.</small>
+        </div>
+        <div class="btn-group">
+            <a class="btn btn-outline-success btn-sm" href="{{ url_for('player_stats', player_id=player.id) }}">Agregar registro</a>
+            <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('predict_player', player_id=player.id) }}">Recalcular potencial</a>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if stats_summary.entries == 0 %}
+        <p class="mb-0 text-muted">Aun no se cargaron datos de rendimiento para este jugador.</p>
+        {% else %}
+        <div class="row g-3 summary-grid">
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Registros</span>
+                    <span class="value">{{ stats_summary.entries }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Partidos</span>
+                    <span class="value">{{ stats_summary.total_matches }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Goles</span>
+                    <span class="value">{{ stats_summary.total_goals }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Asistencias</span>
+                    <span class="value">{{ stats_summary.total_assists }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Minutos</span>
+                    <span class="value">{{ stats_summary.total_minutes }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">% pases</span>
+                    <span class="value">
+                        {% if stats_summary.avg_pass_accuracy is not none %}
+                        {{ stats_summary.avg_pass_accuracy }}%
+                        {% else %}--{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">% disparos</span>
+                    <span class="value">
+                        {% if stats_summary.avg_shot_accuracy is not none %}
+                        {{ stats_summary.avg_shot_accuracy }}%
+                        {% else %}--{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">% duelos</span>
+                    <span class="value">
+                        {% if stats_summary.avg_duels is not none %}
+                        {{ stats_summary.avg_duels }}%
+                        {% else %}--{% endif %}
+                    </span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="summary-card">
+                    <span class="label">Puntaje medio</span>
+                    <span class="value">
+                        {% if stats_summary.avg_final_score is not none %}
+                        {{ stats_summary.avg_final_score }}
+                        {% else %}--{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-wrapper mt-4">
+            <canvas id="historyChart" height="280"></canvas>
+        </div>
+
+        <div class="table-responsive mt-4">
+            <table class="table table-sm table-striped mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Partidos</th>
+                        <th>Minutos</th>
+                        <th>Goles</th>
+                        <th>Asistencias</th>
+                        <th>% pases</th>
+                        <th>% disparos</th>
+                        <th>% duelos</th>
+                        <th>Puntaje</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in recent_stats %}
+                    <tr>
+                        <td>{{ stat.record_date.strftime('%Y-%m-%d') if stat.record_date else '-' }}</td>
+                        <td>{{ stat.matches_played }}</td>
+                        <td>{{ stat.minutes_played }}</td>
+                        <td>{{ stat.goals }}</td>
+                        <td>{{ stat.assists }}</td>
+                        <td>{{ stat.pass_accuracy if stat.pass_accuracy is not none else '--' }}</td>
+                        <td>{{ stat.shot_accuracy if stat.shot_accuracy is not none else '--' }}</td>
+                        <td>{{ stat.duels_won_pct if stat.duels_won_pct is not none else '--' }}</td>
+                        <td>{{ stat.final_score if stat.final_score is not none else '--' }}</td>
+                        <td>{{ stat.notes or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <small class="text-muted d-block mt-2">Se muestran los ultimos tres registros. Consulta "Agregar rendimiento" para ver el historial completo.</small>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section id="perfil-psicologico" class="card mt-5">
+    <div class="card-header">Perfil psicologico y socioemocional</div>
+    <div class="card-body">
+        <p class="text-muted">
+            Interpretacion basada en las variables actuales. Actualiza determinacion, vision y liderazgo desde la seccion de atributos para reflejar cambios con la edad.
+        </p>
+        <div class="row g-4">
+            {% for trait in psychological_profile %}
+            <div class="col-md-6">
+                <div class="trait-card h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">{{ trait.name }}</h5>
+                        <span class="badge {% if trait.band == 'Alto' %}bg-success{% elif trait.band == 'Medio' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                            {{ trait.band }}
+                        </span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-2">
+                        <span class="trait-score">{{ trait.score }}</span>
+                        <span class="text-muted">/ 20</span>
+                    </div>
+                    <p class="mb-0">{{ trait.message }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="plan-desarrollo" class="card mt-5">
+    <div class="card-header">Focos de desarrollo sugeridos</div>
+    <div class="card-body">
+        {% if development_focus %}
+        <ol class="list-group list-group-numbered">
+            {% for gap, delta in development_focus %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">{{ gap }}</div>
+                    <small>Brecha de {{ delta }} puntos respecto al umbral deseado (15).</small>
+                </div>
+                <span class="badge bg-primary rounded-pill">Prioridad</span>
+            </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+        <p class="mb-0">El jugador supera el umbral objetivo en los principales atributos.</p>
+        {% endif %}
+    </div>
+</section>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a href="{{ url_for('edit_player', player_id=player.id) }}" class="btn btn-warning">Editar ficha</a>
+    <form action="{{ url_for('delete_player', player_id=player.id) }}" method="post"
+          onsubmit="return confirm('Seguro que deseas eliminar este jugador?');">
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+    </form>
+    <a href="{{ url_for('index') }}" class="btn btn-secondary">Volver al listado</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+const radarCtx = document.getElementById('technicalRadar');
+if (radarCtx && window.Chart) {
+    new Chart(radarCtx, {
+        type: 'radar',
+        data: {
+            labels: {{ radar_labels | tojson }},
+            datasets: [{
+                label: 'Nivel actual',
+                data: {{ radar_values | tojson }},
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                borderColor: '#0d6efd',
+                pointBackgroundColor: '#0d6efd',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                r: {
+                    suggestedMin: 0,
+                    suggestedMax: 20,
+                    ticks: { stepSize: 5 }
+                }
+            }
+        }
+    });
+}
+
+const historyCtx = document.getElementById('historyChart');
+if (historyCtx && window.Chart) {
+    const history = {{ history_payload | tojson }};
+    const datasets = [];
+    if (history.final_scores.some(v => v !== null)) {
+        datasets.push({
+            label: 'Puntaje final',
+            data: history.final_scores,
+            borderColor: '#0d6efd',
+            backgroundColor: 'rgba(13, 110, 253, 0.15)',
+            tension: 0.2,
+            spanGaps: true
+        });
+    }
+    if (history.pass_pct.some(v => v !== null)) {
+        datasets.push({
+            label: '% pases',
+            data: history.pass_pct,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.12)',
+            tension: 0.2,
+            spanGaps: true
+        });
+    }
+    if (history.shot_pct.some(v => v !== null)) {
+        datasets.push({
+            label: '% disparos',
+            data: history.shot_pct,
+            borderColor: '#f97316',
+            backgroundColor: 'rgba(249, 115, 22, 0.12)',
+            tension: 0.2,
+            spanGaps: true
+        });
+    }
+    if (history.duel_pct.some(v => v !== null)) {
+        datasets.push({
+            label: '% duelos',
+            data: history.duel_pct,
+            borderColor: '#8b5cf6',
+            backgroundColor: 'rgba(139, 92, 246, 0.12)',
+            tension: 0.2,
+            spanGaps: true
+        });
+    }
+
+    new Chart(historyCtx, {
+        type: 'line',
+        data: {
+            labels: history.labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { beginAtZero: true, max: 100 }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+
+const attributeCtx = document.getElementById('attributeChart');
+if (attributeCtx && window.Chart) {
+    const attributeData = {{ attribute_payload | tojson }};
+    const colors = {
+        pace: 'rgba(37, 99, 235, 1)',
+        shooting: 'rgba(249, 115, 22, 1)',
+        passing: 'rgba(22, 163, 74, 1)',
+        dribbling: 'rgba(20, 184, 166, 1)',
+        defending: 'rgba(139, 92, 246, 1)',
+        physical: 'rgba(250, 204, 21, 1)',
+        vision: 'rgba(14, 165, 233, 1)',
+        tackling: 'rgba(251, 113, 133, 1)',
+        determination: 'rgba(168, 85, 247, 1)',
+        technique: 'rgba(8, 145, 178, 1)'
+    };
+
+    const datasets = [];
+    Object.entries(attributeData.series).forEach(([key, values]) => {
+        if (values.some(v => v !== null)) {
+            const color = colors[key] || 'rgba(51, 65, 85, 1)';
+            datasets.push({
+                label: {{ attribute_labels | tojson }}[key] || key,
+                data: values,
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.15)'),
+                tension: 0.2,
+                spanGaps: true
+            });
+        }
+    });
+
+    new Chart(attributeCtx, {
+        type: 'line',
+        data: {
+            labels: attributeData.labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { suggestedMin: 0, suggestedMax: 20 }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

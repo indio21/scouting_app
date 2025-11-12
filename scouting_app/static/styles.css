@@ -1,0 +1,275 @@
+body {
+    background-color: #f3f4f6;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2937;
+}
+
+.app-shell {
+    background-color: #ffffff;
+    padding: 2.5rem 2rem;
+    border-radius: 16px;
+    box-shadow: 0 18px 45px -20px rgba(15, 23, 42, 0.35);
+}
+
+.players-header h1 {
+    font-weight: 700;
+}
+
+.players-header .badge {
+    font-size: 0.9rem;
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.attribute-item {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 0.85rem;
+    border: 1px solid #e5e7eb;
+}
+
+.attribute-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.attribute-progress {
+    height: 0.95rem;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+}
+
+.attribute-progress .progress-bar {
+    border-radius: 999px;
+    font-size: 0.75rem;
+}
+
+.trait-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1.5rem;
+    background: linear-gradient(160deg, #ffffff 0%, #f8fafc 100%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.trait-score {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.player-header .btn-group .btn {
+    white-space: nowrap;
+}
+
+.summary-card {
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 1rem;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-height: 90px;
+}
+
+.summary-card .label {
+    font-size: 0.85rem;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.summary-card .value {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.summary-grid .summary-card {
+    height: 100%;
+}
+
+.timeline-wrapper {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.timeline-wrapper canvas {
+    max-height: 280px;
+}
+
+.stats-summary .list-inline-item + .list-inline-item::before {
+    content: "\2022";
+    padding: 0 0.4rem;
+    color: #9ca3af;
+}
+
+.stats-summary .list-inline-item {
+    color: #4b5563;
+}
+
+.card-header small {
+    font-weight: 400;
+}
+
+.btn-group.flex-wrap .btn {
+    margin-bottom: 0.5rem;
+}
+
+/* Alineación consistente en la navbar */
+.navbar .nav-link,
+.navbar .navbar-text,
+.navbar .btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;      /* evita que "admin" se vea más alto */
+  padding-top: .375rem;  /* iguala altura visual */
+  padding-bottom: .375rem;
+}
+
+/* Espaciado suave entre íconos y texto (si no usás gap en HTML) */
+.navbar i.bi {
+  font-size: 1rem;
+}
+
+/* Estado hover más visible en enlaces */
+.navbar .nav-link:hover {
+  opacity: .9;
+  text-decoration: none;
+}
+
+/* Botón imprimir: borde más sutil en dark */
+.navbar .btn-outline-light.btn-sm {
+  border-color: rgba(255,255,255,.4);
+}
+
+/* Ocultar la barra al imprimir */
+@media print {
+  .navbar, .btn, a.btn, .nav, .navbar * {
+    display: none !important;
+  }
+}
+
+/* Alineación consistente en la navbar */
+.navbar .nav-link,
+.navbar .navbar-text,
+.navbar .btn {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.2;
+  padding-top: .375rem;
+  padding-bottom: .375rem;
+}
+
+/* Separador vertical entre grupos */
+.nav-sep {
+  width: 1px;
+  height: 28px;
+  margin: 0 .75rem;
+  background: rgba(255,255,255,.25);
+}
+
+/* Hover más claro en dark */
+.navbar .nav-link:hover {
+  opacity: .95;
+  text-decoration: none;
+}
+
+/* Botón imprimir en dark */
+.navbar .btn-outline-light.btn-sm {
+  border-color: rgba(255,255,255,.35);
+}
+
+/* Ocultar navbar al imprimir */
+@media print {
+  .navbar, .navbar * {
+    display: none !important;
+  }
+}
+
+
+@media (max-width: 992px) {
+    .players-header .badge {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .players-header .btn,
+    .players-header .btn + .btn {
+        width: 100%;
+    }
+
+    .player-header .btn-group {
+        gap: 0.5rem;
+    }
+
+    .player-header .btn-group .btn {
+        width: 100%;
+    }
+
+    .summary-card {
+        padding: 0.85rem;
+    }
+
+    .summary-card .value {
+        font-size: 1.1rem;
+    }
+
+    .timeline-wrapper {
+        padding: 1.1rem;
+    }
+
+    .dropdown-menu .dropdown-item {
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .app-shell {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .player-header .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .player-header .btn-group .btn {
+        width: 100%;
+    }
+}
+
+.btn-print {
+    border-width: 1px;
+}
+
+.comparison-table td {
+    transition: background-color 0.2s ease;
+}
+
+@media (max-width: 992px) {
+    .comparison-actions .btn {
+        width: 100%;
+    }
+}
+
+@media print {
+    body {
+        background: #ffffff;
+    }
+    nav, footer, .btn-print, .d-print-none, .dropdown-toggle {
+        display: none !important;
+    }
+    .app-shell {
+        box-shadow: none;
+        padding: 0;
+    }
+}

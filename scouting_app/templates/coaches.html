@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Cuerpo técnico{% endblock %}
+
+{% block content %}
+<h1>Cuerpo técnico</h1>
+<a href="{{ url_for('new_coach') }}" class="btn btn-success mb-3">Agregar miembro</a>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nombre</th>
+      <th>Rol</th>
+      <th>Edad</th>
+      <th>Club</th>
+      <th>País</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for coach in coaches %}
+    <tr>
+      <td>{{ coach.id }}</td>
+      <td>{{ coach.name }}</td>
+      <td>{{ coach.role }}</td>
+      <td>{{ coach.age }}</td>
+      <td>{{ coach.club }}</td>
+      <td>{{ coach.country }}</td>
+      <td>
+        <a href="{{ url_for('edit_coach', coach_id=coach.id) }}" class="btn btn-primary btn-sm">Editar</a>
+        <form action="{{ url_for('delete_coach', coach_id=coach.id) }}" method="post" style="display:inline">
+          <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que desea eliminar?')">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

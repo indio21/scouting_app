@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Scouting Inteligente{% endblock %}
+
+{% block body_class %}landing-page{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='landing.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="landing-hero">
+    <div class="landing-hero__text">
+        <h1>Detectá el próximo talento antes que tus rivales</h1>
+        <p>
+            Centralizá datos técnicos, físicos y mentales para estimar el potencial profesional de futbolistas juveniles.
+            Nuestra plataforma combina modelos predictivos con evaluación cualitativa para respaldar decisiones de scouting.
+        </p>
+        <div class="landing-hero__cta">
+            <a class="btn btn-primary btn-lg" href="{{ call_to_action_url }}">{{ call_to_action_label }}</a>
+            <a class="btn btn-outline-light btn-lg" href="#metodologia">Cómo funciona</a>
+        </div>
+    </div>
+    <div class="landing-hero__illustration">
+        <img src="{{ url_for('static', filename='img/hero-scouting.svg') }}" alt="Análisis de scouting" onerror="this.style.display='none';">
+    </div>
+</section>
+
+<section class="landing-metrics">
+    <div class="metric-card">
+        <h3>{{ metrics.total_players }}</h3>
+        <p>Jugadores registrados</p>
+    </div>
+    <div class="metric-card">
+        <h3>{{ metrics.positions }}</h3>
+        <p>Roles cubiertos</p>
+    </div>
+    <div class="metric-card">
+        <h3>{{ metrics.countries }}</h3>
+        <p>Países en seguimiento</p>
+    </div>
+    <div class="metric-card">
+        <h3>
+            {% if metrics.avg_age %}
+                {{ "%.1f"|format(metrics.avg_age) }}
+            {% else %}
+                --
+            {% endif %}
+        </h3>
+        <p>Edad promedio</p>
+    </div>
+</section>
+
+<section class="landing-features" id="ventajas">
+    <h2>Ventajas para tu equipo de scouting</h2>
+    <div class="feature-grid">
+        <article class="feature-card">
+            <h3>Modelo de potencial</h3>
+            <p>
+                Calculamos un puntaje probabilístico combinando rendimiento histórico, evolución física y variables mentales
+                para estimar la probabilidad de alcanzar el primer equipo en 3 años.
+            </p>
+        </article>
+        <article class="feature-card">
+            <h3>Alertas accionables</h3>
+            <p>
+                Recibí alertas automáticas sobre futbolistas con progresión acelerada o caídas repentinas en métricas clave.
+                Configurá umbrales distintos para cada área del club.
+            </p>
+        </article>
+        <article class="feature-card">
+            <h3>Perfil integral</h3>
+            <p>
+                Integramos datos técnicos con seguimiento psicológico y socioemocional para comprender la resiliencia,
+                liderazgo y adaptación del jugador.
+            </p>
+        </article>
+    </div>
+</section>
+
+<section class="landing-method" id="metodologia">
+    <h2>Metodología de evaluación</h2>
+    <div class="method-steps">
+        <div class="method-step">
+            <span class="step-number">1</span>
+            <h4>Captura de datos</h4>
+            <p>Relevamos métricas de rendimiento, evaluaciones de staff técnico, entrevistas psicológicas y contexto familiar.</p>
+        </div>
+        <div class="method-step">
+            <span class="step-number">2</span>
+            <h4>Modelo predictivo híbrido</h4>
+            <p>Combinamos un modelo neuronal con reglas de negocio inspiradas en KPIs de clubes europeos y ligas sudamericanas.</p>
+        </div>
+        <div class="method-step">
+            <span class="step-number">3</span>
+            <h4>Panel de decisión</h4>
+            <p>Visualizá comparativas, simulá planes de progresión y compartí reportes listos para directores deportivos.</p>
+        </div>
+    </div>
+</section>
+
+<section class="landing-testimonial">
+    <blockquote>
+        “La plataforma nos permitió detectar a tiempo a juveniles con resiliencia y crecimiento sostenido, logrando debutar dos
+        jugadores sub-19 en la temporada pasada.”
+    </blockquote>
+    <cite>Director Deportivo - Club de Primera División</cite>
+</section>
+
+<section class="landing-final-cta">
+    <h2>Construí un pipeline de talento sostenible</h2>
+    <p>Ingresá a la app para analizar jugadores, proyectar escenarios y coordinar acciones con tu equipo de scouting.</p>
+    <a class="btn btn-primary btn-lg" href="{{ call_to_action_url }}">{{ call_to_action_label }}</a>
+</section>
+{% endblock %}

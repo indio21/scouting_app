@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Comparador múltiple{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Comparador múltiple</h1>
+<p class="text-muted">
+    Selecciona hasta diez jugadores para comparar atributos y rendimiento histórico.
+</p>
+
+{% if truncated %}
+<div class="alert alert-warning small">
+    Se muestran solo los primeros {{ max_players }} jugadores ordenados por nombre
+    para mejorar el rendimiento del comparador.
+</div>
+{% endif %}
+
+<form method="post" class="card card-body mb-4 shadow-sm">
+    <div class="row g-3">
+        <div class="col-12">
+            <label class="form-label">Jugadores</label>
+            <select name="players" class="form-select" multiple size="10" required>
+                {% for player in players %}
+                <option value="{{ player.id }}"
+                        {% if player.id in selected_ids %}selected{% endif %}>
+                    {{ player.name }} ({{ player.position }})
+                </option>
+                {% endfor %}
+            </select>
+            <div class="form-text">
+                Mantén presionada la tecla Ctrl (o Cmd en Mac) para seleccionar múltiples jugadores.
+            </div>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                Comparar
+            </button>
+        </div>
+    </div>
+</form>
+
+{% if comparison %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header">Ranking por atributos</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Jugador</th>
+                        {% for label in comparison.chart_payload.labels %}
+                        <th>{{ label }}</th>
+                        {% endfor %}
+                        <th>Puntaje total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison.ranking %}
+                    <tr>
+                        <td>{{ row.name }}</td>
+                        {% for label in comparison.chart_payload.labels %}
+                        <td>{{ row.attributes_map[label] }}</td>
+                        {% endfor %}
+                        <td><strong>{{ row.total }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Comparación de atributos (barras)</div>
+            <div class="card-body">
+                <canvas id="comparisonBars"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Promedio de rendimiento histórico</div>
+            <div class="card-body">
+                <canvas id="scoreChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const barsData = {{ comparison.chart_payload|tojson }};
+const barsCtx = document.getElementById('comparisonBars');
+if (barsCtx && window.Chart) {
+    new Chart(barsCtx, {
+        type: 'bar',
+        data: barsData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                x: { stacked: false },
+                y: { beginAtZero: true, suggestedMax: 20 }
+            }
+        }
+    });
+}
+
+const scoreData = {{ comparison.score_payload|tojson }};
+const scoreCtx = document.getElementById('scoreChart');
+if (scoreCtx && window.Chart) {
+    new Chart(scoreCtx, {
+        type: 'bar',
+        data: scoreData,
+        options: {
+            responsive: true,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: { beginAtZero: true, max: 10 }
+            }
+        }
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

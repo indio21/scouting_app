@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <title>{% block title %}Scouting Futbol{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <!-- LOGO: siempre a la landing -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('landing') }}">
+      <i class="bi bi-graph-up-arrow"></i>
+      Scouting IA
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbar"
+            aria-controls="topbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="topbar" class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto align-items-center">
+
+        {% if is_authenticated %}
+          <!-- Comparadores -->
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{{ first_url('compare_players','compare','compare_index') }}">
+              <i class="bi bi-people"></i> 1 vs 1
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{{ first_url('compare_multi','compare_multiple','compare_multi_index') }}">
+              <i class="bi bi-ui-radios-grid"></i> Múltiple
+            </a>
+          </li>
+
+          <li class="nav-sep" aria-hidden="true"></li>
+
+          <!-- Cuerpo técnico -->
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{{ first_url('list_coaches','coaches','coaches_index') }}">
+              <i class="bi bi-person-badge"></i> Entrenadores
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link d-flex align-items-center gap-2" href="{{ first_url('list_directors','directors','directors_index') }}">
+              <i class="bi bi-diagram-3"></i> Directores
+            </a>
+          </li>
+
+          <li class="nav-sep" aria-hidden="true"></li>
+
+          <!-- Imprimir -->
+          <li class="nav-item">
+            <button type="button"
+                    class="btn btn-outline-light btn-sm d-flex align-items-center gap-2"
+                    onclick="window.print()">
+              <i class="bi bi-printer"></i> Imprimir
+            </button>
+          </li>
+
+          <li class="nav-sep" aria-hidden="true"></li>
+
+          <!-- Usuario (dropdown) -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" id="userMenu"
+               role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i> {{ current_username }}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="#">
+                  <i class="bi bi-person"></i> Perfil
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="#">
+                  <i class="bi bi-key"></i> Cambiar contraseña
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="{{ first_url('logout','signout') }}">
+                  <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        {% else %}
+
+          <!-- Solo cuando NO está logueado: botón Ingresar -->
+          <li class="nav-item">
+            <a class="btn btn-primary btn-sm d-flex align-items-center gap-2" href="{{ first_url('login','signin') }}">
+              <i class="bi bi-box-arrow-in-right"></i> Ingresar
+            </a>
+          </li>
+
+        {% endif %}
+
+      </ul>
+    </div>
+  </div>
+</nav>
+
+        <!-- Fix imprimir (no depende de formularios) -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.getElementById('btnPrint');
+            if (btn) btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            window.print();
+            });
+        });
+        </script>
+
+    <div class="container app-shell">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="alert alert-info" role="alert">
+            {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <footer class="footer mt-4 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">&copy; 2025 Proyecto de scouting</span>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-QJHtvGhmr9bInh5B2K7LGbLXzH9VVWlNQ5q+AAqs5P6hUib9IbbVYUew+OrCXaRk" crossorigin="anonymous"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

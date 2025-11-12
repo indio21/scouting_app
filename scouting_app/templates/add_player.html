@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Agregar jugador{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>Agregar nuevo jugador</h1>
+  <form method="post">
+    <div class="row g-3">
+      <!-- Datos personales -->
+      <div class="col-md-6">
+        <label class="form-label">Nombre</label>
+        <input type="text" name="name" class="form-control" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Edad</label>
+        <input type="number" name="age" class="form-control" min="10" max="50" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Posición</label>
+        <input type="text" name="position" class="form-control" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Club</label>
+        <input type="text" name="club" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">País</label>
+        <input type="text" name="country" class="form-control">
+      </div>
+
+      <!-- Habilidades -->
+      <div class="col-md-2">
+        <label class="form-label">Pace</label>
+        <input type="number" name="pace" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Shooting</label>
+        <input type="number" name="shooting" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Passing</label>
+        <input type="number" name="passing" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Dribbling</label>
+        <input type="number" name="dribbling" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Defending</label>
+        <input type="number" name="defending" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Physical</label>
+        <input type="number" name="physical" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Vision</label>
+        <input type="number" name="vision" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Tackling</label>
+        <input type="number" name="tackling" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Determinación</label>
+        <input type="number" name="determination" class="form-control" min="0" max="20">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Técnica</label>
+        <input type="number" name="technique" class="form-control" min="0" max="20">
+      </div>
+
+      <!-- Etiqueta de potencial -->
+      <div class="col-md-4 d-flex align-items-center">
+        <div class="form-check mt-4">
+          <input class="form-check-input" type="checkbox" value="1" id="potential_label" name="potential_label">
+          <label class="form-check-label" for="potential_label">
+            Alto potencial (etiqueta)
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

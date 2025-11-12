@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">Dashboard de scouting</h2>
+<p class="text-muted">Visor general con datos agregados que se actualizan cuando cargas atributos o estadisticas.</p>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small mb-1">Total de jugadores</h6>
+                <div class="display-6 fw-bold">{{ total_players }}</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h6 class="text-muted text-uppercase small mb-1">Puntaje medio historial</h6>
+                <div class="display-6 fw-bold">{{ final_score_avg if final_score_avg is not none else '--' }}</div>
+                <small class="text-muted">Promedio de valoraciones 1-10</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Distribucion por posicion</div>
+            <div class="card-body">
+                <canvas id="positionChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">Clasificacion de potencial</div>
+            <div class="card-body">
+                <canvas id="potentialChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Promedio de atributos (0-20)</div>
+    <div class="card-body">
+        <canvas id="averageChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+const positionCtx = document.getElementById('positionChart');
+if (positionCtx && window.Chart) {
+    new Chart(positionCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ positions|tojson }},
+            datasets: [{
+                label: 'Cantidad de jugadores',
+                data: {{ pos_values|tojson }},
+                backgroundColor: 'rgba(37, 99, 235, 0.5)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+        }
+    });
+}
+
+const potCtx = document.getElementById('potentialChart');
+if (potCtx && window.Chart) {
+    new Chart(potCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ pot_labels|tojson }},
+            datasets: [{
+                data: {{ pot_values|tojson }},
+                backgroundColor: ['#22c55e', '#facc15', '#ef4444', '#cbd5f5']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+}
+
+const avgCtx = document.getElementById('averageChart');
+if (avgCtx && window.Chart) {
+    new Chart(avgCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ avg_labels|tojson }},
+            datasets: [{
+                label: 'Promedio',
+                data: {{ avg_values|tojson }},
+                backgroundColor: 'rgba(13, 110, 253, 0.45)',
+                borderColor: '#0d6efd',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true, max: 20 }
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

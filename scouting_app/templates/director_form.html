@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar dirigente' if director else 'Nuevo dirigente' }}{% endblock %}
+
+{% block content %}
+<h2>{{ 'Editar dirigente' if director else 'Nuevo dirigente' }}</h2>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Nombre</label>
+    <input type="text" class="form-control" name="name" value="{{ director.name if director else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Cargo</label>
+    <input type="text" class="form-control" name="position" value="{{ director.position if director else '' }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Edad</label>
+    <input type="number" class="form-control" name="age" value="{{ director.age if director else '' }}" min="18" max="80">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Club</label>
+    <input type="text" class="form-control" name="club" value="{{ director.club if director else '' }}">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">País</label>
+    <input type="text" class="form-control" name="country" value="{{ director.country if director else '' }}">
+  </div>
+  <button type="submit" class="btn btn-primary">Guardar</button>
+  <a href="{{ url_for('list_directors') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}

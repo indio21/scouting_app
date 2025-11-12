@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}Proyeccion de potencial{% endblock %}
+
+{% block content %}
+<section class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
+            <div>
+                <h1 class="mb-1">Proyeccion actual: {{ player.name }}</h1>
+                <p class="text-muted mb-0">
+                    Resultado combinado entre el modelo y el historial cargado. Mantene los datos al dia para una lectura mas precisa.
+                </p>
+            </div>
+            <div class="btn-group flex-wrap">
+                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('player_detail', player_id=player.id) }}">Ver ficha</a>
+                <a class="btn btn-outline-success btn-sm" href="{{ url_for('player_attributes', player_id=player.id) }}">Actualizar atributos</a>
+                <a class="btn btn-outline-success btn-sm" href="{{ url_for('player_stats', player_id=player.id) }}">Actualizar historial</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">Probabilidad de llegar a profesional</div>
+            <div class="card-body">
+                <div class="display-4 fw-bold">{{ probability }}</div>
+                <span class="badge {% if category == 'Alto potencial' %}bg-success{% elif category == 'Potencial medio' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                    {{ category }}
+                </span>
+                <p class="mt-3 mb-1 text-muted small">Modelo base: {{ probability_base }}</p>
+                <p class="text-muted small">
+                    Ajuste por historial:
+                    {% if probability_delta > 0 %}
+                        <span class="text-success">+{{ probability_delta|round(1) }} pts</span>
+                    {% elif probability_delta < 0 %}
+                        <span class="text-danger">{{ probability_delta|round(1) }} pts</span>
+                    {% else %}
+                        sin cambios
+                    {% endif %}
+                </p>
+
+                <div class="progress mt-3" style="height: 18px;">
+                    {% set prob_value = probability.replace('%','') | float %}
+                    <div class="progress-bar {% if prob_value >= 70 %}bg-success{% elif prob_value >= 40 %}bg-warning text-dark{% else %}bg-secondary{% endif %}"
+                         role="progressbar" style="width: {{ prob_value }}%;" aria-valuenow="{{ prob_value }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ prob_value|round(1) }}%
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <canvas id="probChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">Sugerencias de mejora (umbral 15)</div>
+            <div class="card-body">
+                {% if suggestions %}
+                <ul class="list-group list-group-flush">
+                    {% for name, gap in suggestions %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>{{ name }}</span>
+                        <span class="badge bg-primary rounded-pill">+{{ gap }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted mb-0">Sin recomendaciones especificas. Mantener seguimiento.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">Resumen del historial</div>
+            <div class="card-body">
+                {% if stats_summary.entries == 0 %}
+                <p class="text-muted mb-0">Carga datos desde "Actualizar historial" para enriquecer el calculo.</p>
+                {% else %}
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between"><span>Registros</span><span>{{ stats_summary.entries }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Partidos</span><span>{{ stats_summary.total_matches }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Goles</span><span>{{ stats_summary.total_goals }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Asistencias</span><span>{{ stats_summary.total_assists }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Minutos</span><span>{{ stats_summary.total_minutes }}</span></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Puntaje medio</span><span>{{ stats_summary.avg_final_score or '--' }}</span></li>
+                </ul>
+                <small class="text-muted d-block mt-2">Ultima actualizacion: {{ stats_summary.latest_date or 'Sin registros' }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="card mt-4">
+    <div class="card-header">Progresion de atributos</div>
+    <div class="card-body">
+        {% if attribute_payload.labels %}
+        <canvas id="attributeChart" height="240"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Carga registros de atributos para visualizar la evolucion tecnica.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="card mt-4">
+    <div class="card-header">Evolucion en el tiempo</div>
+    <div class="card-body">
+        {% if history_payload.labels %}
+        <canvas id="historyChart" height="240"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Todavia no hay datos para construir la linea de tiempo.</p>
+        {% endif %}
+    </div>
+</section>
+
+<div class="card mt-4">
+    <div class="card-header">Como se calcula</div>
+    <div class="card-body">
+        <p class="mb-2">
+            La probabilidad base proviene del modelo entrenado en PyTorch con los atributos tecnicos actuales.
+            El ajuste considera el puntaje promedio del historial y pondera un 30% la percepcion de rendimiento sostenido.
+        </p>
+        <p class="mb-0">
+            Para mejorar el puntaje, enfocate en los atributos con mayor brecha y manten actualizados los datos despues de cada partido o microciclo.
+        </p>
+    </div>
+</div>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a class="btn btn-secondary" href="{{ url_for('player_detail', player_id=player.id) }}">Volver</a>
+    <a class="btn btn-outline-success" href="{{ url_for('player_attributes', player_id=player.id) }}">Cargar atributos</a>
+    <a class="btn btn-outline-success" href="{{ url_for('player_stats', player_id=player.id) }}">Cargar nuevo registro</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+(function () {
+    const probCanvas = document.getElementById('probChart');
+    if (probCanvas && window.Chart) {
+        const probValue = parseFloat('{{ probability.replace("%","") }}');
+        const remaining = Math.max(0, 100 - probValue);
+        let color;
+        if (probValue >= 70) color = 'rgba(25, 135, 84, 0.9)';
+        else if (probValue >= 40) color = 'rgba(255, 193, 7, 0.9)';
+        else color = 'rgba(108, 117, 125, 0.9)';
+
+        new Chart(probCanvas, {
+            type: 'doughnut',
+            data: {
+                labels: ['Probabilidad', 'Restante'],
+                datasets: [{
+                    data: [probValue, remaining],
+                    backgroundColor: [color, 'rgba(231, 233, 237, 0.9)'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${ctx.parsed.toFixed(1)}%`
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const attributeCanvas = document.getElementById('attributeChart');
+    if (attributeCanvas && window.Chart) {
+        const attributeData = {{ attribute_payload | tojson }};
+        const colors = {
+            pace: 'rgba(37, 99, 235, 1)',
+            shooting: 'rgba(249, 115, 22, 1)',
+            passing: 'rgba(22, 163, 74, 1)',
+            dribbling: 'rgba(20, 184, 166, 1)',
+            defending: 'rgba(139, 92, 246, 1)',
+            physical: 'rgba(250, 204, 21, 1)',
+            vision: 'rgba(14, 165, 233, 1)',
+            tackling: 'rgba(251, 113, 133, 1)',
+            determination: 'rgba(168, 85, 247, 1)',
+            technique: 'rgba(8, 145, 178, 1)'
+        };
+        const attributeDatasets = [];
+        Object.entries(attributeData.series).forEach(([key, values]) => {
+            if (values.some(v => v !== null)) {
+                const color = colors[key] || 'rgba(51, 65, 85, 1)';
+                attributeDatasets.push({
+                    label: {{ attribute_labels | tojson }}[key] || key,
+                    data: values,
+                    borderColor: color,
+                    backgroundColor: color.replace('1)', '0.15)'),
+                    tension: 0.2,
+                    spanGaps: true
+                });
+            }
+        });
+        new Chart(attributeCanvas, {
+            type: 'line',
+            data: {
+                labels: attributeData.labels,
+                datasets: attributeDatasets
+            },
+            options: {
+                responsive: true,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { suggestedMin: 0, suggestedMax: 20 }
+                },
+                plugins: {
+                    legend: { position: 'bottom' }
+                }
+            }
+        });
+    }
+
+    const historyCanvas = document.getElementById('historyChart');
+    if (historyCanvas && window.Chart) {
+        const history = {{ history_payload | tojson }};
+        if (history.labels.length) {
+            const datasets = [];
+            if (history.final_scores.some(v => v !== null)) {
+                datasets.push({
+                    label: 'Puntaje final',
+                    data: history.final_scores,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.15)',
+                    tension: 0.25,
+                    spanGaps: true,
+                    yAxisID: 'yScores'
+                });
+            }
+            const percMetrics = [
+                { key: 'pass_pct', label: '% pases', border: 'rgba(34,197,94,1)', background: 'rgba(34,197,94,0.15)' },
+                { key: 'shot_pct', label: '% disparos', border: 'rgba(249,115,22,1)', background: 'rgba(249,115,22,0.15)' },
+                { key: 'duel_pct', label: '% duelos', border: 'rgba(139,92,246,1)', background: 'rgba(139,92,246,0.15)' }
+            ];
+            percMetrics.forEach((metric) => {
+                if (history[metric.key].some(v => v !== null)) {
+                    datasets.push({
+                        label: metric.label,
+                        data: history[metric.key],
+                        borderColor: metric.border,
+                        backgroundColor: metric.background,
+                        tension: 0.25,
+                        spanGaps: true,
+                        yAxisID: 'yPercent'
+                    });
+                }
+            });
+
+            new Chart(historyCanvas, {
+                type: 'line',
+                data: {
+                    labels: history.labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    stacked: false,
+                    scales: {
+                        yScores: {
+                            type: 'linear',
+                            position: 'left',
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            title: { display: true, text: 'Puntaje (1-10)' }
+                        },
+                        yPercent: {
+                            type: 'linear',
+                            position: 'right',
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            title: { display: true, text: 'Porcentaje (%)' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+    }
+})();
+</script>
+{% endblock %}

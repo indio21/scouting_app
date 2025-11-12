@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Comparador 1 vs 1{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Comparador de jugadores</h1>
+<p class="text-muted">
+    Selecciona dos jugadores para comparar habilidades, proyección y estadísticas.
+</p>
+
+{% if truncated %}
+<div class="alert alert-warning small">
+    Se muestran solo los primeros {{ max_players }} jugadores ordenados por nombre
+    para mejorar el rendimiento del comparador.
+</div>
+{% endif %}
+
+<form method="post" class="card card-body mb-4 shadow-sm">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label class="form-label">Jugador A</label>
+            <select name="player_one" class="form-select" required>
+                <option value="">Seleccionar...</option>
+                {% for player in players %}
+                <option value="{{ player.id }}"
+                        {% if selected_one == player.id %}selected{% endif %}>
+                    {{ player.name }} ({{ player.position }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Jugador B</label>
+            <select name="player_two" class="form-select" required>
+                <option value="">Seleccionar...</option>
+                {% for player in players %}
+                <option value="{{ player.id }}"
+                        {% if selected_two == player.id %}selected{% endif %}>
+                    {{ player.name }} ({{ player.position }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-12 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                Comparar
+            </button>
+        </div>
+    </div>
+</form>
+
+{% if comparison %}
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">Resumen jugador A</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ comparison.player_one.name }}</h5>
+                <p class="mb-1">
+                    <strong>Posición:</strong> {{ comparison.player_one.position }}
+                </p>
+                <p class="mb-1">
+                    <strong>Probabilidad combinada:</strong>
+                    {{ (comparison.player_one.probability * 100)|round(1) }}%
+                </p>
+                <p class="mb-0">
+                    <strong>Promedio historial:</strong>
+                    {{ comparison.player_one.avg_score or '--' }}
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">Resumen jugador B</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ comparison.player_two.name }}</h5>
+                <p class="mb-1">
+                    <strong>Posición:</strong> {{ comparison.player_two.position }}
+                </p>
+                <p class="mb-1">
+                    <strong>Probabilidad combinada:</strong>
+                    {{ (comparison.player_two.probability * 100)|round(1) }}%
+                </p>
+                <p class="mb-0">
+                    <strong>Promedio historial:</strong>
+                    {{ comparison.player_two.avg_score or '--' }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm">
+    <div class="card-header">Habilidades comparadas</div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Categoría</th>
+                        <th>{{ comparison.player_one.name }}</th>
+                        <th>{{ comparison.player_two.name }}</th>
+                        <th>Ganador</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in comparison.attributes %}
+                    <tr>
+                        <td>{{ row.label }}</td>
+                        <td>{{ row.value_one }}</td>
+                        <td>{{ row.value_two }}</td>
+                        <td>
+                            {% if row.winner == 1 %}
+                                <span class="badge bg-success">Jugador A</span>
+                            {% elif row.winner == 2 %}
+                                <span class="badge bg-primary">Jugador B</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Empate</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm">
+    <div class="card-header">Resumen y conclusión</div>
+    <div class="card-body">
+        <p>
+            <strong>Marcador:</strong>
+            {{ comparison.score_one }} vs {{ comparison.score_two }}
+        </p>
+        <p class="mb-0">
+            <strong>Conclusión:</strong> {{ comparison.conclusion }}
+        </p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+<svg width="420" height="320" viewBox="0 0 420 320" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1b6dc1"/>
+      <stop offset="100%" stop-color="#4fd1c5"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="420" height="320" rx="24" fill="#0f172a"/>
+  <g transform="translate(24, 24)">
+    <rect x="0" y="0" width="200" height="120" rx="12" fill="#111827" stroke="#1b6dc1" stroke-width="2"/>
+    <polyline points="12,90 60,60 96,70 150,30 188,45" fill="none" stroke="url(#grad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="60" cy="60" r="6" fill="#4fd1c5"/>
+    <circle cx="96" cy="70" r="6" fill="#4fd1c5"/>
+    <circle cx="150" cy="30" r="6" fill="#4fd1c5"/>
+    <text x="12" y="24" fill="#93c5fd" font-family="Segoe UI" font-size="14">Proyección de rendimiento</text>
+  </g>
+  <g transform="translate(240, 40)">
+    <ellipse cx="80" cy="80" rx="70" ry="70" fill="#111827" stroke="#4fd1c5" stroke-width="2"/>
+    <path d="M80 24 L123 120 L80 152 L37 120 Z" fill="rgba(79,209,197,0.2)" stroke="#4fd1c5" stroke-width="3"/>
+    <text x="80" y="84" fill="#f1f5f9" font-family="Segoe UI" font-size="14" text-anchor="middle">Potencial</text>
+  </g>
+  <text x="210" y="300" fill="#f8fafc" font-family="Segoe UI" font-size="18" text-anchor="middle">
+    Inteligencia aplicada al descubrimiento de talento
+  </text>
+</svg>

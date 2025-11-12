@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Atributos de {{ player.name }}{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-body">
+        <h1 class="h3 mb-2">Evolucion de atributos: {{ player.name }}</h1>
+        <p class="text-muted mb-0">
+            Registra mejoras o ajustes en los atributos tecnicos, fisicos y mentales. Estos valores actualizan la ficha y alimentan la proyeccion.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card h-100">
+            <div class="card-header">Nuevo registro</div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label" for="record_date">Fecha</label>
+                        <input type="date" class="form-control" id="record_date" name="record_date" value="{{ request.form.record_date or '' }}" required>
+                        <div class="form-text">Usa la fecha del partido, microciclo o evaluacion.</div>
+                    </div>
+                    <div class="row g-3">
+                        {% for field, label in attribute_labels.items() %}
+                        <div class="col-6">
+                            <label class="form-label">{{ label }}</label>
+                            <input type="number" class="form-control" name="{{ field }}" min="0" max="20" placeholder="Valor 0-20">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Notas</label>
+                        <textarea class="form-control" name="notes" rows=3 placeholder="Ej: mejoro la velocidad en test 30m, trabajar toma de decisiones bajo presion."></textarea>
+                    </div>
+                    <div class="d-grid mt-4">
+                        <button class="btn btn-success" type="submit">Guardar registro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card h-100">
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>Historial de atributos</span>
+                <div class="btn-group btn-group-sm">
+                    <form method="post" class="d-inline">
+                        <input type="hidden" name="action" value="recalculate">
+                        <button class="btn btn-outline-secondary" type="submit">Recalcular potencial</button>
+                    </form>
+                    <a class="btn btn-outline-primary" href="{{ url_for('player_detail', player_id=player.id) }}">Volver a la ficha</a>
+                    <a class="btn btn-outline-success" href="{{ url_for('predict_player', player_id=player.id) }}">Ver proyeccion</a>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if history %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                {% for field, label in attribute_labels.items() %}
+                                <th>{{ label }}</th>
+                                {% endfor %}
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history %}
+                            <tr>
+                                <td>{{ entry.record_date.strftime('%Y-%m-%d') if entry.record_date else '-' }}</td>
+                                {% for field, label in attribute_labels.items() %}
+                                <td>{{ entry|attr(field) if entry|attr(field) is not none else '--' }}</td>
+                                {% endfor %}
+                                <td>{{ entry.notes or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Aun no se registraron cambios de atributos para este jugador.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">Resumen visual</div>
+    <div class="card-body">
+        {% if payload.labels %}
+        <canvas id="attributeChart" height="260"></canvas>
+        {% else %}
+        <p class="text-muted mb-0">Carga al menos dos registros para ver la evolucion en el grafico.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    <a class="btn btn-secondary" href="{{ url_for('player_detail', player_id=player.id) }}">Volver a la ficha</a>
+    <a class="btn btn-outline-primary" href="{{ url_for('player_stats', player_id=player.id) }}">Historial de rendimiento</a>
+    <a class="btn btn-outline-success" href="{{ url_for('predict_player', player_id=player.id) }}">Abrir proyeccion</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% if payload.labels %}
+<script>
+const attributeCtx = document.getElementById('attributeChart');
+if (attributeCtx && window.Chart) {
+    const attributeData = {{ payload | tojson }};
+    const colors = {
+        pace: 'rgba(37, 99, 235, 1)',
+        shooting: 'rgba(249, 115, 22, 1)',
+        passing: 'rgba(22, 163, 74, 1)',
+        dribbling: 'rgba(20, 184, 166, 1)',
+        defending: 'rgba(139, 92, 246, 1)',
+        physical: 'rgba(250, 204, 21, 1)',
+        vision: 'rgba(14, 165, 233, 1)',
+        tackling: 'rgba(251, 113, 133, 1)',
+        determination: 'rgba(168, 85, 247, 1)',
+        technique: 'rgba(8, 145, 178, 1)'
+    };
+
+    const datasets = [];
+    Object.entries(attributeData.series).forEach(([key, values]) => {
+        if (values.some(v => v !== null)) {
+            const color = colors[key] || 'rgba(51, 65, 85, 1)';
+            datasets.push({
+                label: {{ attribute_labels | tojson }}[key] || key,
+                data: values,
+                borderColor: color,
+                backgroundColor: color.replace('1)', '0.15)'),
+                tension: 0.2,
+                spanGaps: true
+            });
+        }
+    });
+
+    new Chart(attributeCtx, {
+        type: 'line',
+        data: {
+            labels: attributeData.labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            interaction: { mode: 'index', intersect: false },
+            scales: {
+                y: { suggestedMin: 0, suggestedMax: 20 }
+            },
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

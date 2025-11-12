@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Listado de jugadores{% endblock %}
+
+{% block content %}
+<div class="players-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-2">Jugadores en seguimiento</h1>
+        <p class="text-muted mb-0">Controla el pipeline de talento juvenil y accede a cada ficha con un clic.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="badge bg-primary">Resultados: {{ total_results }}</span>
+        <span class="badge bg-secondary">Pagina {{ page }} de {{ total_pages }}</span>
+        <a class="btn btn-outline-primary" href="{{ url_for('dashboard') }}">Ver dashboard</a>
+    </div>
+</div>
+
+<form method="get" action="{{ url_for('index') }}" class="card card-body shadow-sm bg-light mb-4">
+    <div class="row g-3">
+        <div class="col-md-3">
+            <label for="search" class="form-label">Buscar por nombre</label>
+            <input id="search" type="text" name="q" value="{{ search_term or '' }}" class="form-control" placeholder="Ej: Juan Perez">
+        </div>
+        <div class="col-md-2">
+            <label for="position" class="form-label">Posicion</label>
+            <select id="position" name="position" class="form-select">
+                <option value="">Todas</option>
+                {% for pos in pos_list %}
+                <option value="{{ pos }}" {% if pos_filter == pos %}selected{% endif %}>{{ pos }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="club" class="form-label">Club</label>
+            <select id="club" name="club" class="form-select">
+                <option value="">Todos</option>
+                {% for club in club_list %}
+                <option value="{{ club }}" {% if club_filter == club %}selected{% endif %}>{{ club }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label for="country" class="form-label">Pais</label>
+            <select id="country" name="country" class="form-select">
+                <option value="">Todos</option>
+                {% for country in country_list %}
+                <option value="{{ country }}" {% if country_filter == country %}selected{% endif %}>{{ country }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="order_attr" class="form-label">Ordenar por atributo</label>
+            <select id="order_attr" name="order_attr" class="form-select">
+                <option value="">Sin orden especifico</option>
+                <option value="pace" {% if order_attr == 'pace' %}selected{% endif %}>Ritmo</option>
+                <option value="shooting" {% if order_attr == 'shooting' %}selected{% endif %}>Disparo</option>
+                <option value="passing" {% if order_attr == 'passing' %}selected{% endif %}>Pase</option>
+                <option value="dribbling" {% if order_attr == 'dribbling' %}selected{% endif %}>Regate</option>
+                <option value="defending" {% if order_attr == 'defending' %}selected{% endif %}>Defensa</option>
+                <option value="physical" {% if order_attr == 'physical' %}selected{% endif %}>Fisico</option>
+                <option value="vision" {% if order_attr == 'vision' %}selected{% endif %}>Vision</option>
+                <option value="tackling" {% if order_attr == 'tackling' %}selected{% endif %}>Marcaje</option>
+                <option value="determination" {% if order_attr == 'determination' %}selected{% endif %}>Determinacion</option>
+                <option value="technique" {% if order_attr == 'technique' %}selected{% endif %}>Tecnica</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <div class="form-check mt-4 pt-2">
+                <input class="form-check-input" type="checkbox" name="top_potential" value="1" id="top_potential"
+                       {% if top_potential %}checked{% endif %}>
+                <label class="form-check-label" for="top_potential">
+                    Solo alto potencial
+                </label>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label invisible d-none d-md-block">Aplicar</label>
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive shadow-sm">
+    <table class="table table-hover table-sm align-middle mb-0">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Posicion</th>
+                <th class="d-none d-md-table-cell">Club</th>
+                <th class="d-none d-lg-table-cell">Pais</th>
+                <th>Potencial / Prob.</th>
+                <th class="text-end">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if players %}
+            {% for row in players %}
+            {% set player = row.player %}
+            <tr>
+                <td>
+                    <div class="fw-semibold">{{ player.name }}</div>
+                    <small class="text-muted">ID {{ player.id }}</small>
+                </td>
+                <td>{{ player.position }}</td>
+                <td class="d-none d-md-table-cell">{{ player.club or 'Sin club' }}</td>
+                <td class="d-none d-lg-table-cell">{{ player.country or 'N/D' }}</td>
+                <td>
+                    <div class="d-flex flex-column align-items-end">
+                        <span class="badge {% if row.category == 'Alto potencial' %}bg-success{% elif row.category == 'Potencial medio' %}bg-warning text-dark{% elif row.category == 'Bajo potencial' %}bg-secondary{% else %}bg-light text-dark{% endif %}">
+                            {{ row.category }}
+                        </span>
+                        {% if row.prob_value is not none %}
+                        <small class="text-muted">{{ row.probability }}</small>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="text-end">
+                    <div class="btn-group d-none d-lg-flex" role="group">
+                        <a href="{{ url_for('player_detail', player_id=player.id) }}" class="btn btn-primary btn-sm">Ficha</a>
+                        <a href="{{ url_for('player_attributes', player_id=player.id) }}" class="btn btn-outline-success btn-sm">Atributos</a>
+                        <a href="{{ url_for('player_detail', player_id=player.id) }}#perfil-psicologico" class="btn btn-outline-primary btn-sm">Psicologia</a>
+                        <a href="{{ url_for('predict_player', player_id=player.id) }}" class="btn btn-success btn-sm">Proyeccion</a>
+                    </div>
+                    <div class="dropdown d-lg-none">
+                        <button class="btn btn-sm btn-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Acciones
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{{ url_for('player_detail', player_id=player.id) }}">Ficha</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('player_attributes', player_id=player.id) }}">Atributos</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('player_detail', player_id=player.id) }}#perfil-psicologico">Psicologia</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('predict_player', player_id=player.id) }}">Proyeccion</a></li>
+                        </ul>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    No se encontraron jugadores con los filtros seleccionados.
+                </td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<nav aria-label="Paginacion" class="mt-4">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if page == 1 %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', q=search_term, position=pos_filter, club=club_filter, country=country_filter, top_potential=top_potential, order_attr=order_attr, page=page-1 if page > 1 else 1) }}" aria-label="Anterior">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        <li class="page-item disabled">
+            <span class="page-link">Pagina {{ page }} de {{ total_pages }}</span>
+        </li>
+        <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('index', q=search_term, position=pos_filter, club=club_filter, country=country_filter, top_potential=top_potential, order_attr=order_attr, page=page+1 if page < total_pages else total_pages) }}" aria-label="Siguiente">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+{% endblock %}
