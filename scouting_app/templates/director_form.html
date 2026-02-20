@@ -4,6 +4,7 @@
 {% block content %}
 <h2>{{ 'Editar dirigente' if director else 'Nuevo dirigente' }}</h2>
 <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
   <div class="mb-3">
     <label class="form-label">Nombre</label>
     <input type="text" class="form-control" name="name" value="{{ director.name if director else '' }}" required>

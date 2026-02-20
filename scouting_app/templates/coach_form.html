@@ -4,6 +4,7 @@
 {% block content %}
 <h1>{{ 'Editar' if coach else 'Nuevo' }} miembro del cuerpo técnico</h1>
 <form method="POST">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
   <div class="mb-3">
     <label class="form-label">Nombre</label>
     <input type="text" name="name" class="form-control" value="{{ coach.name if coach else '' }}" required>

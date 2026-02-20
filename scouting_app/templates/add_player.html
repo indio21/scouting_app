@@ -5,6 +5,7 @@
 <div class="container mt-4">
   <h1>Agregar nuevo jugador</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="row g-3">
       <!-- Datos personales -->
       <div class="col-md-6">

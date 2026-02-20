@@ -5,7 +5,7 @@
 <div class="players-header d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
     <div>
         <h1 class="mb-2">Jugadores en seguimiento</h1>
-        <p class="text-muted mb-0">Controla el pipeline de talento juvenil y accede a cada ficha con un clic.</p>
+        <p class="text-muted mb-0">Organiza el seguimiento de talento juvenil y accede a cada ficha con un clic.</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
         <span class="badge bg-primary">Resultados: {{ total_results }}</span>
@@ -25,7 +25,7 @@
             <select id="position" name="position" class="form-select">
                 <option value="">Todas</option>
                 {% for pos in pos_list %}
-                <option value="{{ pos }}" {% if pos_filter == pos %}selected{% endif %}>{{ pos }}</option>
+                <option value="{{ pos }}" {% if pos_filter == pos %}selected{% endif %}>{{ display_position(pos) }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -85,6 +85,7 @@
             <tr>
                 <th>Nombre</th>
                 <th>Posicion</th>
+                <th class="d-none d-md-table-cell">Alternativa</th>
                 <th class="d-none d-md-table-cell">Club</th>
                 <th class="d-none d-lg-table-cell">Pais</th>
                 <th>Potencial / Prob.</th>
@@ -97,10 +98,21 @@
             {% set player = row.player %}
             <tr>
                 <td>
-                    <div class="fw-semibold">{{ player.name }}</div>
-                    <small class="text-muted">ID {{ player.id }}</small>
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="{{ row.photo_url }}" alt="Foto {{ player.name }}" class="player-avatar-sm" loading="lazy">
+                        <div>
+                            <div class="fw-semibold">{{ player.name }}</div>
+                            <small class="text-muted">
+                                {% if player.national_id %}DNI {{ player.national_id }}{% else %}ID {{ player.id }}{% endif %}
+                            </small>
+                        </div>
+                    </div>
                 </td>
-                <td>{{ player.position }}</td>
+                <td>{{ display_position(player.position) }}</td>
+                <td class="d-none d-md-table-cell">
+                    <div class="fw-semibold">{{ display_position(row.best_position) }}</div>
+                    <small class="text-muted">Rendimiento en posicion: {{ row.fit_score }}</small>
+                </td>
                 <td class="d-none d-md-table-cell">{{ player.club or 'Sin club' }}</td>
                 <td class="d-none d-lg-table-cell">{{ player.country or 'N/D' }}</td>
                 <td>
@@ -136,7 +148,7 @@
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="6" class="text-center py-4">
+                <td colspan="7" class="text-center py-4">
                     No se encontraron jugadores con los filtros seleccionados.
                 </td>
             </tr>

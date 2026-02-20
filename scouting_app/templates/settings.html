@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Configuracion{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4">
+    <div>
+        <h1 class="mb-2">Centro de configuracion</h1>
+        <p class="text-muted mb-0">
+            Ejecuta tareas de mantenimiento y, en el futuro, suma opciones para personalizar la plataforma.
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">Actualizar base de datos</div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Ejecuta una actualizacion general de puntajes y refresco de la base operativa. La sincronizacion de jugadores operativos es opcional.
+                </p>
+                <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="action" value="update_database">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-arrow-repeat me-1"></i> Actualizar base de datos
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header">Logs de la ultima ejecucion</div>
+            <div class="card-body">
+                {% if status_messages %}
+                <div class="small">
+                    {% for message in status_messages %}
+                    <pre class="bg-light p-2 rounded">{{ message }}</pre>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Todavia no se ejecuto ninguna tarea desde esta seccion.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if modal_message %}
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="updateModalLabel">Actualizacion de datos</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {{ modal_message }}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{% if modal_message %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEl = document.getElementById('updateModal');
+    if (modalEl && window.bootstrap) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

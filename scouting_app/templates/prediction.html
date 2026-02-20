@@ -5,11 +5,14 @@
 <section class="card mb-4">
     <div class="card-body">
         <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-            <div>
+            <div class="d-flex align-items-center gap-3">
+                <img src="{{ player.photo_url }}" alt="Foto {{ player.name }}" class="player-avatar-md" loading="lazy">
+                <div>
                 <h1 class="mb-1">Proyeccion actual: {{ player.name }}</h1>
                 <p class="text-muted mb-0">
-                    Resultado combinado entre el modelo y el historial cargado. Mantene los datos al dia para una lectura mas precisa.
+                    Resultado general de la ficha actual y el historial cargado. Mantene los datos al dia para una lectura mas precisa.
                 </p>
+                </div>
             </div>
             <div class="btn-group flex-wrap">
                 <a class="btn btn-outline-primary btn-sm" href="{{ url_for('player_detail', player_id=player.id) }}">Ver ficha</a>
@@ -29,7 +32,7 @@
                 <span class="badge {% if category == 'Alto potencial' %}bg-success{% elif category == 'Potencial medio' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                     {{ category }}
                 </span>
-                <p class="mt-3 mb-1 text-muted small">Modelo base: {{ probability_base }}</p>
+                <p class="mt-3 mb-1 text-muted small">Puntaje de ficha: {{ probability_base }}</p>
                 <p class="text-muted small">
                     Ajuste por historial:
                     {% if probability_delta > 0 %}
@@ -40,6 +43,10 @@
                         sin cambios
                     {% endif %}
                 </p>
+                <p class="mb-0">
+                    <strong>Puesto alternativo recomendado:</strong> {{ display_position(best_position) }} ({{ best_position_score|round(1) }})
+                </p>
+                <p class="text-muted small">Rendimiento en su puesto natural: {{ current_fit|round(1) }}</p>
 
                 <div class="progress mt-3" style="height: 18px;">
                     {% set prob_value = probability.replace('%','') | float %}
@@ -122,11 +129,11 @@
     <div class="card-header">Como se calcula</div>
     <div class="card-body">
         <p class="mb-2">
-            La probabilidad base proviene del modelo entrenado en PyTorch con los atributos tecnicos actuales.
-            El ajuste considera el puntaje promedio del historial y pondera un 30% la percepcion de rendimiento sostenido.
+            El puntaje inicial se arma con los atributos tecnicos y fisicos actuales del jugador.
+            Luego se ajusta segun la regularidad del historial y el rendimiento sostenido en el tiempo.
         </p>
         <p class="mb-0">
-            Para mejorar el puntaje, enfocate en los atributos con mayor brecha y manten actualizados los datos despues de cada partido o microciclo.
+            Para mejorar el resultado, enfocate en los atributos con mayor margen de crecimiento y actualiza la ficha despues de cada partido o bloque de entrenamiento.
         </p>
     </div>
 </div>

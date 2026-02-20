@@ -1,5 +1,5 @@
-{% extends "base.html" %}
-{% block title %}Scouting Inteligente{% endblock %}
+﻿{% extends "base.html" %}
+{% block title %}Scouting Futbol{% endblock %}
 
 {% block body_class %}landing-page{% endblock %}
 
@@ -11,18 +11,18 @@
 {% block content %}
 <section class="landing-hero">
     <div class="landing-hero__text">
-        <h1>Detectá el próximo talento antes que tus rivales</h1>
+        <h1>Detecta el proximo talento antes que tus rivales</h1>
         <p>
-            Centralizá datos técnicos, físicos y mentales para estimar el potencial profesional de futbolistas juveniles.
-            Nuestra plataforma combina modelos predictivos con evaluación cualitativa para respaldar decisiones de scouting.
+            Centraliza datos tecnicos, fisicos y mentales para estimar la proyeccion profesional de futbolistas juveniles.
+            La plataforma integra evaluaciones del cuerpo tecnico e historial deportivo para respaldar decisiones de scouting.
         </p>
         <div class="landing-hero__cta">
             <a class="btn btn-primary btn-lg" href="{{ call_to_action_url }}">{{ call_to_action_label }}</a>
-            <a class="btn btn-outline-light btn-lg" href="#metodologia">Cómo funciona</a>
+            <a class="btn btn-outline-light btn-lg" href="#metodologia">Como funciona</a>
         </div>
     </div>
     <div class="landing-hero__illustration">
-        <img src="{{ url_for('static', filename='img/hero-scouting.svg') }}" alt="Análisis de scouting" onerror="this.style.display='none';">
+        <img src="{{ url_for('static', filename='img/hero-scouting.svg') }}" alt="Analisis de scouting" onerror="this.style.display='none';">
     </div>
 </section>
 
@@ -37,7 +37,7 @@
     </div>
     <div class="metric-card">
         <h3>{{ metrics.countries }}</h3>
-        <p>Países en seguimiento</p>
+        <p>Paises en seguimiento</p>
     </div>
     <div class="metric-card">
         <h3>
@@ -55,61 +55,61 @@
     <h2>Ventajas para tu equipo de scouting</h2>
     <div class="feature-grid">
         <article class="feature-card">
-            <h3>Modelo de potencial</h3>
+            <h3>Puntaje de proyeccion</h3>
             <p>
-                Calculamos un puntaje probabilístico combinando rendimiento histórico, evolución física y variables mentales
-                para estimar la probabilidad de alcanzar el primer equipo en 3 años.
+                Se calcula un puntaje general combinando rendimiento historico, evolucion fisica y variables mentales
+                para priorizar a los juveniles con mejor proyeccion deportiva.
             </p>
         </article>
         <article class="feature-card">
             <h3>Alertas accionables</h3>
             <p>
-                Recibí alertas automáticas sobre futbolistas con progresión acelerada o caídas repentinas en métricas clave.
-                Configurá umbrales distintos para cada área del club.
+                Recibi alertas sobre futbolistas con progresion acelerada o caidas repentinas en metricas clave.
+                Configura umbrales distintos para cada area del club.
             </p>
         </article>
         <article class="feature-card">
             <h3>Perfil integral</h3>
             <p>
-                Integramos datos técnicos con seguimiento psicológico y socioemocional para comprender la resiliencia,
-                liderazgo y adaptación del jugador.
+                Integra datos tecnicos con seguimiento psicologico y socioemocional para comprender resiliencia,
+                liderazgo y adaptacion del jugador.
             </p>
         </article>
     </div>
 </section>
 
 <section class="landing-method" id="metodologia">
-    <h2>Metodología de evaluación</h2>
+    <h2>Metodologia de evaluacion</h2>
     <div class="method-steps">
         <div class="method-step">
             <span class="step-number">1</span>
             <h4>Captura de datos</h4>
-            <p>Relevamos métricas de rendimiento, evaluaciones de staff técnico, entrevistas psicológicas y contexto familiar.</p>
+            <p>Releva metricas de rendimiento, evaluaciones de staff tecnico, entrevistas psicologicas y contexto familiar.</p>
         </div>
         <div class="method-step">
             <span class="step-number">2</span>
-            <h4>Modelo predictivo híbrido</h4>
-            <p>Combinamos un modelo neuronal con reglas de negocio inspiradas en KPIs de clubes europeos y ligas sudamericanas.</p>
+            <h4>Analisis integral</h4>
+            <p>Combina ficha tecnica, evolucion reciente y criterios deportivos para priorizar jugadores con mejor proyeccion.</p>
         </div>
         <div class="method-step">
             <span class="step-number">3</span>
-            <h4>Panel de decisión</h4>
-            <p>Visualizá comparativas, simulá planes de progresión y compartí reportes listos para directores deportivos.</p>
+            <h4>Panel de decision</h4>
+            <p>Visualiza comparativas, simula planes de progresion y comparte reportes para el cuerpo tecnico.</p>
         </div>
     </div>
 </section>
 
 <section class="landing-testimonial">
     <blockquote>
-        “La plataforma nos permitió detectar a tiempo a juveniles con resiliencia y crecimiento sostenido, logrando debutar dos
-        jugadores sub-19 en la temporada pasada.”
+        "La plataforma nos permitio detectar a tiempo a juveniles con resiliencia y crecimiento sostenido, logrando debutar dos
+        jugadores sub-19 en la temporada pasada."
     </blockquote>
-    <cite>Director Deportivo - Club de Primera División</cite>
+    <cite>Director Deportivo - Club de Primera Division</cite>
 </section>
 
 <section class="landing-final-cta">
-    <h2>Construí un pipeline de talento sostenible</h2>
-    <p>Ingresá a la app para analizar jugadores, proyectar escenarios y coordinar acciones con tu equipo de scouting.</p>
+    <h2>Construi un seguimiento de talento sostenible</h2>
+    <p>Ingresa a la app para analizar jugadores, proyectar escenarios y coordinar acciones con tu equipo de scouting.</p>
     <a class="btn btn-primary btn-lg" href="{{ call_to_action_url }}">{{ call_to_action_label }}</a>
 </section>
 {% endblock %}

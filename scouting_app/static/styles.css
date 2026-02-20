@@ -19,6 +19,31 @@ body {
     font-size: 0.9rem;
 }
 
+.player-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #d1d5db;
+}
+
+.player-avatar-md {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+}
+
+.player-avatar-lg {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 8px 20px -14px rgba(15, 23, 42, 0.55);
+}
+
 .card-header {
     font-weight: 600;
 }

@@ -2,86 +2,68 @@
 {% block title %}Editar jugador{% endblock %}
 
 {% block content %}
+{% set form = form_data if form_data is defined else None %}
 <div class="container mt-4">
   <h1>Editar jugador</h1>
   <form method="post">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="row g-3">
-      <!-- Datos personales -->
       <div class="col-md-6">
         <label class="form-label">Nombre</label>
-        <input type="text" name="name" class="form-control" value="{{ player.name }}" required>
+        <input type="text" name="name" class="form-control" value="{{ form.get('name') if form else player.name }}" required>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">DNI / ID</label>
+        <input type="text" name="national_id" class="form-control" inputmode="numeric" pattern="\d*" value="{{ form.get('national_id') if form else player.national_id }}" required>
       </div>
       <div class="col-md-3">
         <label class="form-label">Edad</label>
-        <input type="number" name="age" class="form-control" value="{{ player.age }}" min="10" max="50" required>
+        <input type="number" name="age" class="form-control" value="{{ form.get('age') if form else player.age }}" min="12" max="18" required>
       </div>
-      <div class="col-md-3">
-        <label class="form-label">Posición</label>
-        <input type="text" name="position" class="form-control" value="{{ player.position }}" required>
+      <div class="col-md-4">
+        <label class="form-label">Posicion</label>
+        {% set selected_position = form.get('position') if form else player.position %}
+        <select name="position" class="form-select" required>
+          {% for pos in position_options %}
+          <option value="{{ pos }}" {% if selected_position == pos %}selected{% endif %}>{{ display_position(pos) }}</option>
+          {% endfor %}
+        </select>
       </div>
-      <div class="col-md-6">
+      <div class="col-md-4">
         <label class="form-label">Club</label>
-        <input type="text" name="club" class="form-control" value="{{ player.club }}">
+        <input type="text" name="club" class="form-control" value="{{ form.get('club') if form else player.club }}">
       </div>
-      <div class="col-md-6">
-        <label class="form-label">País</label>
-        <input type="text" name="country" class="form-control" value="{{ player.country }}">
+      <div class="col-md-4">
+        <label class="form-label">Pais</label>
+        <input type="text" name="country" class="form-control" value="{{ form.get('country') if form else player.country }}">
       </div>
-
-      <!-- Habilidades -->
+      <div class="col-md-12">
+        <label class="form-label">Foto (URL)</label>
+        <input type="url" name="photo_url" class="form-control"
+               value="{{ form.get('photo_url') if form else player.photo_url }}"
+               placeholder="https://...">
+      </div>
+      {% for attr, label in {
+        'pace':'Ritmo','shooting':'Disparo','passing':'Pase','dribbling':'Regate',
+        'defending':'Defensa','physical':'Fisico','vision':'Vision','tackling':'Marcaje',
+        'determination':'Determinacion','technique':'Tecnica'}.items() %}
       <div class="col-md-2">
-        <label class="form-label">Pace</label>
-        <input type="number" name="pace" class="form-control" value="{{ player.pace }}" min="0" max="20">
+        <label class="form-label">{{ label }}</label>
+        {% set attr_value = form.get(attr) if form else (player|attr(attr)) %}
+        <input type="number" name="{{ attr }}" class="form-control" value="{{ attr_value }}" min="0" max="20" required>
       </div>
-      <div class="col-md-2">
-        <label class="form-label">Shooting</label>
-        <input type="number" name="shooting" class="form-control" value="{{ player.shooting }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Passing</label>
-        <input type="number" name="passing" class="form-control" value="{{ player.passing }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Dribbling</label>
-        <input type="number" name="dribbling" class="form-control" value="{{ player.dribbling }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Defending</label>
-        <input type="number" name="defending" class="form-control" value="{{ player.defending }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Physical</label>
-        <input type="number" name="physical" class="form-control" value="{{ player.physical }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Vision</label>
-        <input type="number" name="vision" class="form-control" value="{{ player.vision }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Tackling</label>
-        <input type="number" name="tackling" class="form-control" value="{{ player.tackling }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Determinación</label>
-        <input type="number" name="determination" class="form-control" value="{{ player.determination }}" min="0" max="20">
-      </div>
-      <div class="col-md-2">
-        <label class="form-label">Técnica</label>
-        <input type="number" name="technique" class="form-control" value="{{ player.technique }}" min="0" max="20">
-      </div>
-
-      <!-- (Opcional) Etiqueta de potencial -->
+      {% endfor %}
       <div class="col-md-4 d-flex align-items-center">
         <div class="form-check mt-4">
+          {% set checked = form.get('potential_label') if form else ('1' if player.potential_label else '') %}
           <input class="form-check-input" type="checkbox" value="1" id="potential_label" name="potential_label"
-                 {% if player.potential_label %}checked{% endif %}>
+                 {% if checked %}checked{% endif %}>
           <label class="form-check-label" for="potential_label">
             Alto potencial (etiqueta)
           </label>
         </div>
       </div>
     </div>
-
     <div class="mt-4">
       <button type="submit" class="btn btn-primary">Guardar</button>
       <a href="{{ url_for('player_detail', player_id=player.id) }}" class="btn btn-secondary ms-2">Cancelar</a>

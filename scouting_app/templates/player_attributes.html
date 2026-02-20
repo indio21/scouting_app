@@ -17,6 +17,7 @@
             <div class="card-header">Nuevo registro</div>
             <div class="card-body">
                 <form method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <div class="mb-3">
                         <label class="form-label" for="record_date">Fecha</label>
                         <input type="date" class="form-control" id="record_date" name="record_date" value="{{ request.form.record_date or '' }}" required>
@@ -47,6 +48,7 @@
                 <span>Historial de atributos</span>
                 <div class="btn-group btn-group-sm">
                     <form method="post" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <input type="hidden" name="action" value="recalculate">
                         <button class="btn btn-outline-secondary" type="submit">Recalcular potencial</button>
                     </form>

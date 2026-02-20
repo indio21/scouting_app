@@ -4,15 +4,34 @@ services:
     runtime: python
     plan: free
     rootDir: .
-    healthCheckPath: /healthz
+    healthCheckPath: /health
     buildCommand: |
       pip install --upgrade pip
       pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.9.1+cpu
       pip install -r requirements.txt
-    startCommand: gunicorn --chdir scouting_app app:app --workers 1 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
+    startCommand: gunicorn app:app --chdir scouting_app --workers 1 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
+      - key: APP_SECRET_KEY
+        generateValue: true
+      - key: APP_DB_URL
+        value: sqlite:///players_updated_v2.db
+      - key: TRAINING_DB_URL
+        value: sqlite:///players_training.db
+      - key: EVAL_POOL_MAX
+        value: "100"
+      - key: ENFORCE_EVAL_POOL_LIMIT
+        value: "1"
+      - key: SYNC_SHORTLIST_ENABLED
+        value: "0"
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ALLOW_DEFAULT_ADMIN
+        value: "false"
+      - key: LOG_LEVEL
+        value: INFO
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PYTHONDONTWRITEBYTECODE
         value: "1"
-        

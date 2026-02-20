@@ -1,0 +1,29 @@
+﻿__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+.venv/
+venv/
+.env
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local database sidecars and temp artifacts
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+*.pt
+*.pth
+*.onnx
+
+# Docs/artifacts not part of app source
+*.zip
+_word_media/
+_smoke_tmp/
+_smoke_tmp_v2/

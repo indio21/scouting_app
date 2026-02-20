@@ -11,15 +11,18 @@
         <input type="text" class="form-control" name="name" value="{{ player.name if player else '' }}" required>
       </div>
       <div class="mb-3">
-        <label class="form-label">Edad</label>
-        <input type="number" class="form-control" name="age" value="{{ player.age if player else '' }}" min="15" max="40" required>
+        <label class="form-label">DNI / ID</label>
+        <input type="text" class="form-control" name="national_id" value="{{ player.national_id if player else '' }}" inputmode="numeric" pattern="\d*" required>
       </div>
       <div class="mb-3">
-        <label class="form-label">Posición</label>
+        <label class="form-label">Edad</label>
+        <input type="number" class="form-control" name="age" value="{{ player.age if player else '' }}" min="12" max="18" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Posicion</label>
         <select class="form-select" name="position" required>
-          {% set positions = ['Portero','Defensa','Lateral','Mediocampista','Delantero'] %}
-          {% for pos in positions %}
-          <option value="{{ pos }}" {% if player and player.position == pos %}selected{% endif %}>{{ pos }}</option>
+          {% for pos in ['Portero','Defensa','Lateral','Mediocampista','Delantero'] %}
+          <option value="{{ pos }}" {% if player and player.position == pos %}selected{% endif %}>{{ display_position(pos) }}</option>
           {% endfor %}
         </select>
       </div>
@@ -28,16 +31,16 @@
         <input type="text" class="form-control" name="club" value="{{ player.club if player else '' }}">
       </div>
       <div class="mb-3">
-        <label class="form-label">País</label>
+        <label class="form-label">Pais</label>
         <input type="text" class="form-control" name="country" value="{{ player.country if player else '' }}">
       </div>
     </div>
     <div class="col-md-6">
-      <h5>Atributos (0–20)</h5>
+      <h5>Atributos (0-20)</h5>
       {% for attr, label in {
         'pace':'Ritmo','shooting':'Disparo','passing':'Pase','dribbling':'Regate',
-        'defending':'Defensa','physical':'Físico','vision':'Visión','tackling':'Marcaje',
-        'determination':'Determinación','technique':'Técnica'}.items() %}
+        'defending':'Defensa','physical':'Fisico','vision':'Vision','tackling':'Marcaje',
+        'determination':'Determinacion','technique':'Tecnica'}.items() %}
       <div class="mb-3">
         <label class="form-label">{{ label }}</label>
         <input type="number" class="form-control" name="{{ attr }}" value="{{ getattr(player, attr) if player else '' }}" min="0" max="20" required>

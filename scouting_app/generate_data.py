@@ -14,11 +14,30 @@ Ejemplo de uso:
 
 import argparse
 import random
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from models import Base, Player
+from player_logic import normalized_position, default_player_photo_url
 
+used_identifiers = set()
+
+
+def next_identifier() -> str:
+    while True:
+        value = random.randint(10000000, 59999999)
+        if value not in used_identifiers:
+            used_identifiers.add(value)
+            return str(value)
+
+
+def ensure_player_columns(engine) -> None:
+    with engine.connect() as conn:
+        columns = [row[1] for row in conn.execute(text("PRAGMA table_info(players)"))]
+        if "national_id" not in columns:
+            conn.execute(text("ALTER TABLE players ADD COLUMN national_id TEXT"))
+        if "photo_url" not in columns:
+            conn.execute(text("ALTER TABLE players ADD COLUMN photo_url TEXT"))
 
 def generate_player() -> Player:
     """Genera un jugador con atributos aleatorios."""
@@ -42,8 +61,8 @@ def generate_player() -> Player:
     countries = ["Argentina", "Brasil", "Uruguay", "Chile", "Paraguay"]
 
     name = f"{random.choice(names)} {random.choice(surnames)}"
-    age = random.randint(16, 22)
-    position = random.choice(positions)
+    age = random.randint(12, 28)
+    position = normalized_position(random.choice(positions))
     club = random.choice(clubs)
     country = random.choice(countries)
 
@@ -68,10 +87,12 @@ def generate_player() -> Player:
 
     return Player(
         name=name,
+        national_id=next_identifier(),
         age=age,
         position=position,
         club=club,
         country=country,
+        photo_url=default_player_photo_url(name=name),
         pace=attrs['pace'],
         shooting=attrs['shooting'],
         passing=attrs['passing'],
@@ -90,6 +111,7 @@ def main(num_players: int, db_url: str) -> None:
     """Genera `num_players` jugadores y los guarda en la base de datos."""
     engine = create_engine(db_url)
     Base.metadata.create_all(engine)
+    ensure_player_columns(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
 

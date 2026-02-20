@@ -25,10 +25,12 @@ class Player(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+    national_id = Column(String, unique=True, nullable=True)
     age = Column(Integer, nullable=False)
     position = Column(String, nullable=False)
     club = Column(String, nullable=True)
     country = Column(String, nullable=True)
+    photo_url = Column(String, nullable=True)
 
     # Atributos técnicos y físicos (valorados 0–20)
     pace = Column(Integer, nullable=False)
@@ -53,10 +55,12 @@ class Player(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "national_id": self.national_id,
             "age": self.age,
             "position": self.position,
             "club": self.club,
             "country": self.country,
+            "photo_url": self.photo_url,
             "pace": self.pace,
             "shooting": self.shooting,
             "passing": self.passing,

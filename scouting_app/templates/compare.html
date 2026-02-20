@@ -23,7 +23,7 @@
                 {% for player in players %}
                 <option value="{{ player.id }}"
                         {% if selected_one == player.id %}selected{% endif %}>
-                    {{ player.name }} ({{ player.position }})
+                    {{ player.name }} ({{ display_position(player.position) }})
                 </option>
                 {% endfor %}
             </select>
@@ -35,10 +35,20 @@
                 {% for player in players %}
                 <option value="{{ player.id }}"
                         {% if selected_two == player.id %}selected{% endif %}>
-                    {{ player.name }} ({{ player.position }})
+                    {{ player.name }} ({{ display_position(player.position) }})
                 </option>
                 {% endfor %}
             </select>
+        </div>
+        <div class="col-lg-4">
+            <label class="form-label">Posicion objetivo</label>
+            <select name="target_position" class="form-select">
+                <option value="">Automatica (puesto natural de Jugador A)</option>
+                {% for pos in ['Portero','Defensa','Lateral','Mediocampista','Delantero'] %}
+                <option value="{{ pos }}" {% if target_position == pos %}selected{% endif %}>{{ display_position(pos) }}</option>
+                {% endfor %}
+            </select>
+            <div class="form-text">Los pesos cambian segun el rol.</div>
         </div>
         <div class="col-12 d-flex justify-content-end">
             <button type="submit" class="btn btn-primary">
@@ -56,15 +66,22 @@
             <div class="card-body">
                 <h5 class="card-title">{{ comparison.player_one.name }}</h5>
                 <p class="mb-1">
-                    <strong>Posición:</strong> {{ comparison.player_one.position }}
+                    <strong>Posición:</strong> {{ display_position(comparison.player_one.position) }}
                 </p>
                 <p class="mb-1">
                     <strong>Probabilidad combinada:</strong>
                     {{ (comparison.player_one.probability * 100)|round(1) }}%
                 </p>
+                <p class="mb-1">
+                    <strong>Rendimiento en posicion objetivo:</strong> {{ comparison.player_one.fit_score|round(1) }}
+                </p>
                 <p class="mb-0">
                     <strong>Promedio historial:</strong>
                     {{ comparison.player_one.avg_score or '--' }}
+                </p>
+                <p class="mb-0">
+                    <strong>Puesto alternativo recomendado:</strong>
+                    {{ display_position(comparison.player_one.best_position) }} ({{ comparison.player_one.best_position_score|round(1) }})
                 </p>
             </div>
         </div>
@@ -75,15 +92,22 @@
             <div class="card-body">
                 <h5 class="card-title">{{ comparison.player_two.name }}</h5>
                 <p class="mb-1">
-                    <strong>Posición:</strong> {{ comparison.player_two.position }}
+                    <strong>Posición:</strong> {{ display_position(comparison.player_two.position) }}
                 </p>
                 <p class="mb-1">
                     <strong>Probabilidad combinada:</strong>
                     {{ (comparison.player_two.probability * 100)|round(1) }}%
                 </p>
+                <p class="mb-1">
+                    <strong>Rendimiento en posicion objetivo:</strong> {{ comparison.player_two.fit_score|round(1) }}
+                </p>
                 <p class="mb-0">
                     <strong>Promedio historial:</strong>
                     {{ comparison.player_two.avg_score or '--' }}
+                </p>
+                <p class="mb-0">
+                    <strong>Puesto alternativo recomendado:</strong>
+                    {{ display_position(comparison.player_two.best_position) }} ({{ comparison.player_two.best_position_score|round(1) }})
                 </p>
             </div>
         </div>
@@ -127,16 +151,20 @@
 </div>
 
 <div class="card mt-4 shadow-sm">
-    <div class="card-header">Resumen y conclusión</div>
+    <div class="card-header">Resumen y conclusi�n</div>
     <div class="card-body">
+        {% if comparison.target_position %}
+        <p class="text-muted">Pesos aplicados para la posici�n <strong>{{ display_position(comparison.target_position) }}</strong>.</p>
+        {% endif %}
         <p>
             <strong>Marcador:</strong>
-            {{ comparison.score_one }} vs {{ comparison.score_two }}
+            {{ comparison.score_one|round(1) }} vs {{ comparison.score_two|round(1) }}
         </p>
         <p class="mb-0">
-            <strong>Conclusión:</strong> {{ comparison.conclusion }}
+            <strong>Conclusi�n:</strong> {{ comparison.conclusion }}
         </p>
     </div>
 </div>
+
 {% endif %}
 {% endblock %}
