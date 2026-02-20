@@ -2,7 +2,7 @@ from typing import List, Tuple, Callable, Optional, Dict
 from datetime import datetime, date, timedelta
 from statistics import mean
 from types import SimpleNamespace
-from flask import Flask, render_template, redirect, url_for, request, session, flash, abort
+from flask import Flask, render_template, redirect, url_for, request, session, flash, abort, jsonify
 from sqlalchemy import create_engine, func, desc
 from sqlalchemy.orm import sessionmaker
 import numpy as np
@@ -66,6 +66,27 @@ def landing():
         call_to_action_url=call_to_action_url,
         call_to_action_label=call_to_action_label,
     )
+
+
+@app.route("/healthz")
+def healthz():
+    """Liveness para infraestructura (Render)."""
+    return jsonify({"status": "ok"}), 200
+
+
+@app.route("/health")
+def health():
+    """Readiness simple con chequeo de DB."""
+    db = None
+    try:
+        db = Session()
+        db.query(func.count(Player.id)).scalar()
+        return jsonify({"status": "ok", "db": "up"}), 200
+    except Exception as exc:
+        return jsonify({"status": "degraded", "db": "down", "detail": str(exc)}), 503
+    finally:
+        if db is not None:
+            db.close()
 
 # ----------------------------------------------------
 

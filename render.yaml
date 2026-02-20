@@ -4,11 +4,12 @@ services:
     runtime: python
     plan: free
     rootDir: .
+    healthCheckPath: /healthz
     buildCommand: |
-          pip install --upgrade pip
-          pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.9.1+cpu
-          pip install -r requirements.txt 
-    startCommand: gunicorn app:app --chdir scouting_app --workers 2 --threads 4 --timeout 120 --bind 0.0.0.0:$PORT
+      pip install --upgrade pip
+      pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.9.1+cpu
+      pip install -r requirements.txt
+    startCommand: gunicorn --chdir scouting_app app:app --workers 1 --threads 2 --timeout 120 --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
